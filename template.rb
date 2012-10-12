@@ -39,14 +39,17 @@ answers[:jasmine] = yes?("Jasmine? (yes/no)")
 
 
 # Guard
-guardfile = <<-GUARDFILE
-guard 'rspec', :version => 2 do
-  watch(%r{^spec/.+_spec\.rb$})
-  watch(%r{^lib/(.+)\.rb$})     { |m| "spec/\#{m[1]}_spec.rb" }
-  watch('spec/spec_helper.rb')  { "spec" }
+if answers[:guard]
+    guardfile = <<-GUARDFILE
+    guard 'rspec', :version => 2 do
+      watch(%r{^spec/.+_spec\.rb$})
+      watch(%r{^lib/(.+)\.rb$})     { |m| "spec/\#{m[1]}_spec.rb" }
+      watch('spec/spec_helper.rb')  { "spec" }
+    end
+    GUARDFILE
+
+    file 'Guardfile', guardfile
 end
-GUARDFILE
-file 'Guardfile', guardfile if answers[:guard]
 
 
 if answers[:jasmine] && answers[:guard]
