@@ -1,7 +1,7 @@
+answers = {}
 file '.rvmrc', "rvm use 1.9.3-p194"
-gems = <<-GEMS
 
-group :development do
+gem_group :development, :test do
     gem "rspec"
     gem "rake"
     gem "guard"
@@ -15,14 +15,7 @@ group :development do
     gem "rspec-rails"
 end
 
-group :linux do
-    gem "rb-inotify"
-    gem "libnotify"
-end
-
-gem 'jquery-rails'
-GEMS
-
+# .gitignore
 gitignore = <<-GITIGNORE
 vendor/bundle/
 .bundle/
@@ -35,8 +28,17 @@ yardoc/
 *~
 /config/database.yml
 GITIGNORE
-run "echo '#{gems}' >> Gemfile"
-run "echo '#{gitignore}' >> .gitignore"
+append_file ".gitignore", gitignore, :force => true
+
+
+# Questions
+answers[:guard] = yes?("Guardfile? (yes/no)")
+answers[:twitter_bootsrap] = yes?("Twitter Bootstrap? (yes/no)")
+answers[:backbone] = yes?("Backbone? (yes/no)")
+answers[:jasmine] = yes?("Jasmine? (yes/no)")
+
+
+# Guard
 guardfile = <<-GUARDFILE
 guard 'rspec', :version => 2 do
   watch(%r{^spec/.+_spec\.rb$})
@@ -44,18 +46,30 @@ guard 'rspec', :version => 2 do
   watch('spec/spec_helper.rb')  { "spec" }
 end
 GUARDFILE
+file 'Guardfile', guardfile if answers[:guard]
 
-file 'Guardfile', guardfile if yes?("Guardfile? (yes/no)")
+gem "twitter-bootstrap-rails" if answers[:twitter_bootsrap]
+gem "rails-backbone" if answers[:backbone]
 
-run "echo 'gem \"twitter-bootstrap-rails\", :group => :assets' >> Gemfile" if yes?("Twitter Bootstrap? (yes/no)")
-run "echo 'gem \"rails-backbone\"' >> Gemfile" if yes?("Backbone? (yes/no)")
+gem_group :development, :test do
+    gem 'jasmine'
+    gem 'jasminerice'
+    gem 'guard-jasmine'
+end if answers[:jasmine]
 
+inside("config") do
+    run "cp database.yml.example database.yml"
+end
 
-jasmine = <<-JASMINE
-gem 'jasmine'
-gem 'jasminerice'
-gem 'guard'
-gem 'guard-jasmine'
-JASMINE
+run "rm public/index.html"
 
-run "echo '#{jasmine}' >> Gemfile" if yes?("Jasmine? (yes/no)")
+run "bundle install --path vendor/bundle"
+
+generate "rspec:install"
+generate "bootstrap:install" if answers[:twitter_bootsrap]
+generate "backbone:install" if answers[:backbone]
+generate "jasmine:install" if answers[:jasmine]
+
+git :init
+git :add => "."
+git :commit => "-a -m 'Initial commit'"
