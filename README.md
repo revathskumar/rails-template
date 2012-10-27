@@ -1,3 +1,10 @@
+My rails Template
+=================
+
+* Usage
+
+        rails new appName -Td mysql --skip-bundle -m https://raw.github.com/revathskumar/rails-template/master/template.rb
+
 My rails App boilerplate
 ========================
 
