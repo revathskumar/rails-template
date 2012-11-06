@@ -36,7 +36,10 @@ answers[:guard] = yes?("Guardfile? (yes/no)")
 answers[:twitter_bootsrap] = yes?("Twitter Bootstrap? (yes/no)")
 answers[:backbone] = yes?("Backbone? (yes/no)")
 answers[:jasmine] = yes?("Jasmine? (yes/no)")
+strategies = ["","omniauth-google-oauth2", "omniauth-facebook", "omniauth-instagram", "omniauth-github", "omniauth-twitter"]
+answers[:oauth] = ask("Omniauth? [1.Google, 2.Facebook, 3.Instagram, 4.Github, 5.Twitter, 6.None]").to_i
 
+gem strategies[answers[:oauth]] unless ["",nil].include?(strategies[answers[:oauth]])
 
 # Guard
 if answers[:guard]
@@ -75,7 +78,7 @@ gem_group :development, :test do
 end if answers[:jasmine]
 
 inside("config") do
-    run "cp database.yml.example database.yml"
+    run "cp database.yml database.yml.example"
 end
 
 run "rm public/index.html"
