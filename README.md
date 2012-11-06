@@ -5,6 +5,8 @@ My rails Template
 
         rails new appName -Td mysql --skip-bundle -m https://raw.github.com/revathskumar/rails-template/master/template.rb
 
+        rake rails:template LOCATION=https://raw.github.com/revathskumar/rails-template/master/template.rb
+
 My rails App boilerplate
 ========================
 
