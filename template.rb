@@ -100,7 +100,12 @@ if answers[:jasmine] && answers[:guard]
     append_file 'Guardfile', jasmine_guard
 end
 
-gem "twitter-bootstrap-rails" if answers[:twitter_bootsrap]
+if answers[:twitter_bootsrap]
+    gem "therubyracer"
+    gem "less-rails"
+    gem "twitter-bootstrap-rails"
+end
+
 gem "rails-backbone" if answers[:backbone]
 
 gem_group :development, :test do
