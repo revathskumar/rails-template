@@ -186,6 +186,8 @@ end
 generate "backbone:install" if answers[:backbone]
 generate "jasmine:install" if answers[:jasmine]
 
-git :init
-git :add => "."
-git :commit => "-a -m 'Initial commit'"
+unless run("git rev-parse --is-inside-work-tree")
+  git :init
+  git :add => "."
+  git :commit => "-a -m 'Initial commit'"
+end
