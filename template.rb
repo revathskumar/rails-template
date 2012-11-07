@@ -172,7 +172,17 @@ run "rm app/assets/images/rails.png"
 run "bundle install --path vendor/bundle"
 
 generate "rspec:install"
-generate "bootstrap:install" if answers[:twitter_bootsrap]
+
+if answers[:twitter_bootsrap]
+  generate "bootstrap:install"
+  layout_types = ["","fluid","fixed"]
+  answers[:layout_type] = ask("Bootstrap layout? [1.Fluid, 2.Fixed] ")
+  type = "fluid"
+  type = layout_types[answers[:layout_type].to_i] unless ["",nil].include?(layout_types[answers[:layout_type].to_i])
+
+  generate "bootstrap:layout application #{type}"
+end
+
 generate "backbone:install" if answers[:backbone]
 generate "jasmine:install" if answers[:jasmine]
 
