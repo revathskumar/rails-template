@@ -167,6 +167,7 @@ inside("config") do
 end
 
 run "rm public/index.html"
+run "rm app/assets/images/rails.png"
 
 run "bundle install --path vendor/bundle"
 
