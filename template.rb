@@ -71,6 +71,54 @@ CODE
     end
 
     initializer 'config.rb', 'CONFIG = YAML.load_file("#{Rails.root.to_s}/config/config_#{Rails.env}.yml")'
+    generate(:controller, "Sessions")
+    file "app/controllers/sessions_controller.rb", <<-SESSION
+class SessionsController < ApplicationController
+  # This controller manages authentication, and therefore, accessing this section does not require authentication.
+  skip_before_filter :require_authentication
+
+  # Create an authorized session if the e-mail received from Google Authentication callback is a a MobME email address.
+  def create
+    if auth_hash['info']['email'].ends_with? "@mobme.in"
+      session[:authenticated] = auth_hash
+      redirect_url = request.env['omniauth.origin']
+      redirect_url = view_context.base_url if redirect_url && ["logout", "failure", 'callback'].any? { |s| redirect_url.include?(s) }
+      redirect_to redirect_url || view_context.base_url
+    else
+      @unauthenticated_email_address = auth_hash['info']['email']
+      @reason = :unauthenticated_email_address
+      render :action => 'failure', :layout => 'application_unauthenticated'
+    end
+  end
+
+  # Authentication failure management.
+  def failure
+    require 'base64'
+    session[:authenticated] = false
+    case params[:message]
+      when "invalid_credentials"
+        @reason = :invalid_credentials
+      else
+        @reason = params.inspect
+    end
+
+    render :layout => 'application_unauthenticated'
+  end
+
+  # Logout.
+  def destroy
+    session[:authenticated] = false
+    render :layout => 'application_unauthenticated'
+  end
+
+  protected
+
+  # Returns omniauth's post-authorization details hash.
+  def auth_hash
+    request.env['omniauth.auth']
+  end
+end
+    SESSION
 end
 
 # Guard
