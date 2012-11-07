@@ -36,10 +36,42 @@ answers[:guard] = yes?("Guardfile? (yes/no)")
 answers[:twitter_bootsrap] = yes?("Twitter Bootstrap? (yes/no)")
 answers[:backbone] = yes?("Backbone? (yes/no)")
 answers[:jasmine] = yes?("Jasmine? (yes/no)")
+
 strategies = ["","omniauth-google-oauth2", "omniauth-facebook", "omniauth-instagram", "omniauth-github", "omniauth-twitter"]
 answers[:oauth] = ask("Omniauth? [1.Google, 2.Facebook, 3.Instagram, 4.Github, 5.Twitter, 6.None]").to_i
 
-gem strategies[answers[:oauth]] unless ["",nil].include?(strategies[answers[:oauth]])
+valid_strategy = !["",nil].include?(strategies[answers[:oauth]])
+
+if valid_strategy
+    provider = seleted_strategy = strategies[answers[:oauth]]
+
+    gem seleted_strategy
+    provider["omniauth-"] = ""
+    provider.gsub! "-", "_"
+
+    omniauth = <<-CODE
+Rails.application.config.middleware.use OmniAuth::Builder do
+
+  provider :developer unless Rails.env.production?
+  provider :#{provider}, CONFIG['omniauth_credentials']['client_id'], CONFIG['omniauth_credentials']['client_secret']
+end unless Rails.env.test?
+CODE
+
+    initializer 'omniauth.rb', omniauth
+
+    custom_config = <<-CODE
+omniauth_credentials:
+  client_id: 'CLIENT_ID'
+  client_secret: 'CLIENT_SECRET'
+CODE
+
+    inside("config") do
+        file "config_development.yml", custom_config
+        run "cp config_development.yml config_development.yml.example"
+    end
+
+    initializer 'config.rb', 'CONFIG = YAML.load_file("#{Rails.root.to_s}/config/config_#{Rails.env}.yml")'
+end
 
 # Guard
 if answers[:guard]
